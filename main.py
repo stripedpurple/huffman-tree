@@ -1,28 +1,36 @@
 #!/usr/bin/env python
-from heapq import heappush, heappop, heapify
+
 from collections import defaultdict
+from heapq import heapify, heappop, heappush
+import random
+import string
 
-def encode(symb2freq):
-    """Huffman encode the given dict mapping symbols to weights"""
-    heap = [[wt, [sym, ""]] for sym, wt in symb2freq.items()]
+def encode(symbol_frequency):
+    heap = [[weight, [symbol, ""]] for symbol, weight in symbol_frequency.items()]
     heapify(heap)
-    while len(heap) > 1:
-        lo = heappop(heap)
-        hi = heappop(heap)
-        for pair in lo[1:]:
-            pair[1] = '0' + pair[1]
-        for pair in hi[1:]:
-            pair[1] = '1' + pair[1]
-        heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
-    return sorted(heappop(heap)[1:], key=lambda p: (len(p[-1]), p))
 
-txt = "this is an example for huffman encoding"
-symb2freq = defaultdict(int)
-for ch in txt:
-    symb2freq[ch] += 1
-# in Python 3.1+:
-# symb2freq = collections.Counter(txt)
-huff = encode(symb2freq)
+    while len(heap) > 1:
+        low = heappop(heap)
+        high = heappop(heap)
+
+        for bits in low[1:]:
+            bits[1] = '0' + bits[1]
+        for bits in high[1:]:
+            bits[1] = '1' + bits[1]
+        heappush(heap, [low[0] + high[0]] + low[1:] + high[1:])
+
+    return sorted(heappop(heap)[1:], key=lambda f: (len(f[-1]), f))
+
+txt = "".join( [random.choice(string.letters) for i in xrange(15)] )
+symbol_frequency = defaultdict(int)
+
+for char in txt:
+    symbol_frequency[char] += 1
+
+huffman = encode(symbol_frequency)
+print "Intial String:", txt
+print "="*35 + "\n"
 print "Symbol\tWeight\tHuffman Code"
-for p in huff:
-    print "%s\t%s\t%s" % (p[0], symb2freq[p[0]], p[1])
+print "-"*35
+for i in huffman:
+    print "%s\t%s\t%s" % (i[0], symbol_frequency[i[0]], i[1])
